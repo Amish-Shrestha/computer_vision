@@ -14,7 +14,7 @@ image_with_rectangles = white.copy()
 for i, rectangle in enumerate(rectangles):
     x1, y1, x2, y2 = rectangle
     cv2.rectangle(image_with_rectangles, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    cv2.putText(image_with_rectangles, str(i + 1), (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    # cv2.putText(image_with_rectangles, str(i + 1), (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
 # Display the image with rectangles
 cv2.imshow('Numbered Rectangles', image_with_rectangles)
