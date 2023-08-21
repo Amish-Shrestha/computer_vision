@@ -1,22 +1,48 @@
 import cv2
-import numpy as np
 
 # Load the image
-white = np.zeros(shape=(500, 800, 3), dtype=np.uint8) + 255 # Create a white background
+image_path = '/media/user/New Volume/Computer Vision/Task_2/image.png'
+image = cv2.imread(image_path)
+# Resize the image if needed
+image = cv2.resize(image, (800, 1200))
 
-# Define the rectangles' coordinates (you need to provide these)
-rectangles = [(50, 50, 150, 100), (200, 150, 300, 200), (350, 250, 450, 300), (100, 400, 200, 450)]
+# Convert the image to grayscale
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Create a copy of the original image for drawing rectangles
-image_with_rectangles = white.copy()
+# Apply Gaussian blur to reduce noise
+blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+# Apply Canny edge detection
+edges = cv2.Canny(blurred_image, threshold1=30, threshold2=100)
+contours, _ = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# Draw rectangles with numbering
-for i, rectangle in enumerate(rectangles):
-    x1, y1, x2, y2 = rectangle
-    cv2.rectangle(image_with_rectangles, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    # cv2.putText(image_with_rectangles, str(i + 1), (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+# Filter rectangles based on shape properties (e.g., four sides)
+rectangles = []
+for contour in contours:
+    approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
+    if len(approx) == 4:
+        rectangles.append(approx)
 
-# Display the image with rectangles
-cv2.imshow('Numbered Rectangles', image_with_rectangles)
+# Define your length thresholds for assigning numbers
+threshold1 = 400  # Adjust this threshold based on your criteria
+threshold2 = 400  # Adjust this threshold based on your criteria
+
+# Measure the length of each rectangle and number them
+for i, rect in enumerate(rectangles):
+    x, y, w, h = cv2.boundingRect(rect)
+    length = max(w, h)  # Measure length based on the longer side
+
+    # Assign numbers based on length thresholds
+    if length < threshold1:
+        number = 1
+    elif length < threshold2:
+        number = 2
+    else:
+        number = 3
+
+    # Draw the assigned number on the rectangle
+    cv2.putText(image, str(number), (x + w // 2, y + h // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+# Display the image with numbered rectangles
+cv2.imshow('Numbered Rectangles', image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
